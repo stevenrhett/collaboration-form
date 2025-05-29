@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Let's Collaborate - QR Code Sheet</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 20px;
+            background: white;
+        }
+
+        .instructions {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+
+        .instructions h1 {
+            color: #750014;
+            margin-bottom: 10px;
+        }
+
+        .qr-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .qr-card {
+            text-align: center;
+            padding: 20px;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            background: white;
+        }
+
+        .qr-card h3 {
+            color: #750014;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .qr-card p {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .qr-code-container {
+            display: inline-block;
+        }
+
+        @media print {
+            .instructions {
+                display: none;
+            }
+
+            body {
+                padding: 0;
+            }
+
+            .qr-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+                max-width: 100%;
+            }
+
+            .qr-card {
+                border: 1px solid #ddd;
+                padding: 15px;
+                page-break-inside: avoid;
+            }
+
+            .qr-card h3 {
+                font-size: 16px;
+                margin-bottom: 5px;
+            }
+
+            .qr-card p {
+                font-size: 11px;
+                margin-bottom: 10px;
+            }
+        }
+
+        /* For different layouts */
+        .layout-2x3 { grid-template-columns: repeat(2, 1fr); }
+        .layout-4x2 { grid-template-columns: repeat(4, 1fr); }
+        .layout-1x1 { grid-template-columns: 1fr; max-width: 400px; }
+    </style>
+</head>
+<body>
+    <div class="instructions">
+        <h1>QR Code Print Sheet</h1>
+        <p>This page will print 6 QR codes (3x2 layout) that can be cut out for business cards.</p>
+        <p>Each QR code links to: <span id="form-url"></span></p>
+        <button onclick="window.print()">Print This Page</button>
+        <button onclick="changeLayout()">Change Layout</button>
+    </div>
+
+    <div class="qr-grid" id="qrGrid">
+        <!-- QR codes will be generated here -->
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        // IMPORTANT: Update this to your actual form URL
+        const FORM_URL = 'https://stevenrhett.github.io/collaboration-form/';
+        
+        document.getElementById('form-url').textContent = FORM_URL;
+
+        // Generate multiple QR codes
+        function generateQRCodes() {
+            const grid = document.getElementById('qrGrid');
+            grid.innerHTML = ''; // Clear existing codes
+
+            for (let i = 0; i < 6; i++) {
+                const card = document.createElement('div');
+                card.className = 'qr-card';
+                card.innerHTML = `
+                    <h3>Let's Collaborate!</h3>
+                    <p>Scan to connect</p>
+                    <div class="qr-code-container" id="qr-${i}"></div>
+                `;
+                grid.appendChild(card);
+
+                // Generate QR code
+                new QRCode(document.getElementById(`qr-${i}`), {
+                    text: FORM_URL,
+                    width: 150,
+                    height: 150,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+            }
+        }
+
+        // Change layout function
+        let currentLayout = 0;
+        const layouts = ['', 'layout-2x3', 'layout-4x2', 'layout-1x1'];
+        
+        function changeLayout() {
+            currentLayout = (currentLayout + 1) % layouts.length;
+            const grid = document.getElementById('qrGrid');
+            grid.className = 'qr-grid ' + layouts[currentLayout];
+            
+            // Adjust number of QR codes based on layout
+            const counts = [6, 6, 8, 1];
+            if (currentLayout === 2) generateQRCodesCount(8);
+            else if (currentLayout === 3) generateQRCodesCount(1);
+            else generateQRCodes();
+        }
+
+        function generateQRCodesCount(count) {
+            const grid = document.getElementById('qrGrid');
+            grid.innerHTML = '';
+
+            for (let i = 0; i < count; i++) {
+                const card = document.createElement('div');
+                card.className = 'qr-card';
+                card.innerHTML = `
+                    <h3>Let's Collaborate!</h3>
+                    <p>Scan to connect</p>
+                    <div class="qr-code-container" id="qr-${i}"></div>
+                `;
+                grid.appendChild(card);
+
+                new QRCode(document.getElementById(`qr-${i}`), {
+                    text: FORM_URL,
+                    width: currentLayout === 3 ? 250 : 150,
+                    height: currentLayout === 3 ? 250 : 150,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+            }
+        }
+
+        // Generate on load
+        generateQRCodes();
+    </script>
+</body>
+</html>

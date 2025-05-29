@@ -141,6 +141,80 @@
             border-radius: 12px;
         }
 
+        .qr-actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .qr-button {
+            padding: 10px 20px;
+            background-color: #750014;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .qr-button:hover {
+            background-color: #5a0010;
+            transform: translateY(-1px);
+        }
+
+        .qr-button.secondary {
+            background-color: #666;
+        }
+
+        .qr-button.secondary:hover {
+            background-color: #555;
+        }
+
+        /* Print-specific styles */
+        @media print {
+            body {
+                background: white;
+            }
+            
+            .form-container {
+                display: none;
+            }
+            
+            .print-only {
+                display: block !important;
+                text-align: center;
+                padding: 40px;
+            }
+            
+            .print-only h1 {
+                font-size: 36px;
+                margin-bottom: 20px;
+                color: #750014;
+            }
+            
+            .print-only p {
+                font-size: 18px;
+                margin-bottom: 40px;
+                color: #333;
+            }
+            
+            .print-only #qrcode-print {
+                display: inline-block;
+                padding: 20px;
+                border: 2px solid #e0e0e0;
+            }
+        }
+
+        .print-only {
+            display: none;
+        }
+
         @media (max-width: 480px) {
             .form-container {
                 padding: 30px 20px;
@@ -196,7 +270,18 @@
         <div class="qr-section">
             <h2>Scan to Access This Form</h2>
             <div id="qrcode"></div>
+            <div class="qr-actions">
+                <button class="qr-button" onclick="downloadQR()">Download QR Code</button>
+                <button class="qr-button secondary" onclick="printQR()">Print QR Code</button>
+            </div>
         </div>
+    </div>
+
+    <!-- Print-only section -->
+    <div class="print-only">
+        <h1>Let's Collaborate!</h1>
+        <p>Scan this QR code to access the collaboration form</p>
+        <div id="qrcode-print"></div>
     </div>
 
     <!-- QR Code Library -->
@@ -204,12 +289,14 @@
     
     <script>
         // Generate QR code for current page URL
+        let qrcode;
         document.addEventListener('DOMContentLoaded', function() {
             // For development/testing, use current URL
             // In production, replace with your actual form URL
             const currentUrl = window.location.href;
             
-            new QRCode(document.getElementById("qrcode"), {
+            // Generate main QR code
+            qrcode = new QRCode(document.getElementById("qrcode"), {
                 text: currentUrl,
                 width: 200,
                 height: 200,
@@ -217,7 +304,34 @@
                 colorLight: "#ffffff",
                 correctLevel: QRCode.CorrectLevel.H
             });
+            
+            // Generate print QR code
+            new QRCode(document.getElementById("qrcode-print"), {
+                text: currentUrl,
+                width: 300,
+                height: 300,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
         });
+
+        // Download QR code function
+        function downloadQR() {
+            const qrCanvas = document.querySelector('#qrcode canvas');
+            if (qrCanvas) {
+                // Create a link element
+                const link = document.createElement('a');
+                link.download = 'collaboration-qr-code.png';
+                link.href = qrCanvas.toDataURL();
+                link.click();
+            }
+        }
+
+        // Print QR code function
+        function printQR() {
+            window.print();
+        }
 
         // Google Sheets configuration
         const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbzmARHL4PtospYKpTF5Vn5PE308RuWTTAhoG4nFzwlnRcsDItrt4aibYqaC7630X1K8/exec'; 
